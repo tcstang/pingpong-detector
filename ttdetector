@@ -1,0 +1,49 @@
+#!/bin/bash
+# Default-Start: 3 4 5
+# Default-Stop: 0 1 6
+
+HOME_DIR=/home/pi/pir
+LOG_FILE=$HOME_DIR/ttdetector.log
+
+# returns ok if connected, error otherwise
+check_internet()
+{
+    ping -q -w 1 -c 1 $(ip r | grep default | cut -d ' ' -f 3) > /dev/null && echo ok || echo error
+}
+
+start() {
+    echo "Starting ttdetector"
+    $HOME_DIR/ttdetector.py > $LOG_FILE 2>&1 &
+}
+
+stop() {
+    kill -9 $(pgrep -f ttdetector.py)
+}
+
+case "$1" in 
+    start)
+       start
+       ;;
+    stop)
+       stop
+       ;;
+    restart)
+       stop
+       start
+       ;;
+    status)
+       # code to check status of app comes here 
+       # example: status program_name
+       pid=$(pgrep -f ttdetector.py)
+       if [ -z "$pid" ]; then
+           echo "ttdetector is not running"
+       else
+           echo "ttdetector is running with pid $pid"
+
+       fi
+       ;;
+    *)
+       echo "Usage: $0 {start|stop|status|restart}"
+esac
+
+exit 0 
